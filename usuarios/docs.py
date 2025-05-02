@@ -1,4 +1,4 @@
-from usuarios.requeST import PostLoginRequest
+from usuarios.requests import PostLoginRequest
 
 
 from drf_spectacular.utils import extend_schema
