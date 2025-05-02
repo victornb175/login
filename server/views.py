@@ -5,12 +5,30 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
+from rest_framework import serializers
 
+class PostLoginRequest(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+
+@extend_schema(
+    description="""
+    Esta es la ruta del login
+    sirve para iniciar session
+    """,
+    summary="sirve para iniciar session",
+    request=PostLoginRequest,
+)
 @api_view(['POST'])
 def login(request):
+    serializer = PostLoginRequest(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    login_raw = serializer.validated_data
     
-    user = get_object_or_404(User, username=request.data['username'])
-    if not user.check_password(request.data['password']):
+    user = get_object_or_404(User, username=login_raw.get('username'))
+    if not user.check_password(login_raw.get('password')):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     
     token, created = Token.objects.get_or_create(user=user)
